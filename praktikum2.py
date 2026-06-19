@@ -48,12 +48,43 @@ else:
 
 print("-" * 55)
 
+# untuk integrasi romberg
+R = [[0.0] * levels for _ in range(levels)]
+
 for k in range(levels):
     n = 2 ** k
     result = trapezoidal(expr, a, b, n)
+    
+    # untuk integrasi romberg
+    R[k][0] = result
 
     if exact != 0:
         error = abs((exact - result) / exact) * 100
         print(f"{n:<8}{result:<20.10f}{error:<15.4f}")
     else:
         print(f"{n:<8}{result:<20.10f}")
+
+print("\n")
+print("=" * 55)
+
+for j in range(1, levels):
+    for i in range(j, levels):
+        R[i][j] = R[i][j-1] + (R[i][j-1] - R[i-1][j-1]) / ((4**j) - 1)
+
+print("\n\n=== TABEL INTEGRASI ROMBERG ===")
+print("-" * 75)
+
+for i in range(levels):
+    baris = f"k={i+1} | "
+    for j in range(i + 1):
+        baris += f"{R[i][j]:<14.7f} "
+    print(baris)
+    
+print("-" * 75)
+
+nilai_akhir = R[levels-1][levels-1]
+print(f"\nNILAI INTEGRASI ROMBERG TERBAIK : {nilai_akhir:.10f}")
+
+if exact != 0:
+    error_romberg = abs((exact - nilai_akhir) / exact) * 100
+    print(f"ERROR ROMBERG TERBAIK           : {error_romberg:.6f}%")
